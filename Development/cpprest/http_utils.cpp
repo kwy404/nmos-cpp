@@ -519,7 +519,9 @@ namespace web
                 // required
                 const auto max_age = find_directive(directives, U("max-age"));
                 if (directives.end() == max_age) throw std::invalid_argument("invalid Strict-Transport-Security header, missing max-age");
-                // hm, invalid value is treated as 0
+                // "max-age-value = delta-seconds" where "delta-seconds = 1*DIGIT"
+                // See https://tools.ietf.org/html/rfc6797#section-6.1.1
+                if (!std::all_of(max_age->second.begin(), max_age->second.end(), [](utility::char_t c) { return U('0') <= c && c <= U('9'); })) throw std::invalid_argument("invalid Strict-Transport-Security header, invalid max-age");
                 result.max_age = utility::istringstreamed(max_age->second, 0u);
 
                 // optional
